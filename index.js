@@ -35,12 +35,29 @@ const server = http.createServer((req, res) => {
 
     req.on('end', _=> {
         buffer += decoder.end();
-        // Send the response
-        res.end('Hello World\n');
+        // Choose the handler the request should go to.
+        // If one doesn't exit send the request to the 404 handler
+        const chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : router.notFound;
+        // Construct the data to send to the handler
+        const data = { trimmedPath, queryStringObject, method, headers,payload: buffer };
 
-        // Log the path of the request
-        console.log('Request $', trimmedPath, method);
-        console.log('Request $', queryStringObject, headers);
+        // Route the request to the chosen handler
+        chosenHandler(data, (statusCode, payload) => {
+            // Use the statusCode return by the handler, othewise, default the 200.
+            statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+            // Use the payload return by the handler, or default to an empty object.
+            payload = typeof(payload) == 'object' ? payload : {};
+            // Convert the payload to a string.
+            const payloadString = JSON.stringify(payload);
+            // Return the response.
+            res.setHeader('Content-Type', 'application/json');
+            res.writeHead(statusCode);
+            res.end(payloadString);
+            // Log the path of the request
+            console.log('Request $', statusCode, payloadString);
+            console.log('Request $', trimmedPath, method);
+            console.log('Request $', queryStringObject, headers);
+        });
     });
 });
 
@@ -49,3 +66,22 @@ server.listen(port, _=> {
     console.log(`Server is listening on port ${port}`);
 });
 
+// Define handler
+const handlers = {};
+
+// Sample handler
+handlers.sample = (data, cb) => {
+    // Callback a http status code and a payload object
+    cb(406, { 'name': 'Sample Handler'});
+};
+// 404 handler
+handlers.notFound = (data, cb) => {
+    cb(404, { 'name': '404 Handler'});
+};
+
+
+// Define a request handler
+const router = {
+    'sample': handlers.sample,
+    'notFound': handlers.notFound
+};
