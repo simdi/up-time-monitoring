@@ -2,6 +2,9 @@
 * @author: Chisimdi Damian Ezeanieto
 * @date: 21/01/2019
 */
+// Dependencies
+const _data = require('./lib/data');
+
 // Define handler
 const handlers = {};
 // Ping handler
