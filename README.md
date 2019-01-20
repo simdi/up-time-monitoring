@@ -8,26 +8,26 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+To run this application with little or no issues, you need
 
 ```
-Give examples
+Node (any version)
 ```
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
+To get this application up and running in staging env,
 
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
+go to the root directory of the cloned project, and run
 
 ```
-until finished
+node index.js
+```
+
+OR
+
+```
+NODE_ENV=staging node index.js
 ```
 
 End with an example of getting some data out of the system or using it for a little demo
