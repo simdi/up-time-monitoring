@@ -4,15 +4,41 @@
 */
 // Dependencies
 const http = require('http');
+const https = require('https');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./config');
+const fs = require('fs');
 
-const port = process.env.PORT || config.port;
+const httpsCertPath = './https/cert.pem';
+const httpsKeyPath = './https/key.pem';
+const httpPort = process.env.PORT || config.httpPort;
+const httpsPort = process.env.PORT || config.httpsPort;
 const env = config.envName;
 
-// The server should respond to all requests with a string.
-const server = http.createServer((req, res) => {
+// Instantiate the http server
+const httpServer = http.createServer((req, res) => {
+    unifiedServer(req, res);
+});
+// Start the http server and have it listen to the port specified.
+httpServer.listen(httpPort, _=> {
+    console.log(`Http server is running in ${env} on port ${httpPort}`);
+});
+// Instantiate the https server
+const httpsServerOptions = {
+    cert: fs.readFileSync(httpsCertPath),
+    key: fs.readFileSync(httpsKeyPath)
+};
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
+    unifiedServer(req, res);
+});
+// Start the https server and have it listen to the port specified.
+httpsServer.listen(httpsPort, _=> {
+    console.log(`Https server is running in ${env} on port ${httpsPort}`);
+});
+
+// All the server logic for both the http and https server.
+const unifiedServer = (req, res) => {
     // Get the url and parse it.
     const parsedUrl = url.parse(req.url, true);
     console.log('Parsed Url', parsedUrl);
@@ -61,12 +87,7 @@ const server = http.createServer((req, res) => {
             console.log('Request $', queryStringObject, headers);
         });
     });
-});
-
-// Start the server and have it listen to the port specified.
-server.listen(port, _=> {
-    console.log(`Server is running in ${env} on port ${port}`);
-});
+};
 
 // Define handler
 const handlers = {};
