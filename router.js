@@ -4,8 +4,8 @@
 */
 
 // Dependencies
-const users = require('./services/users');
-const tokens = require('./services/tokens');
+const _users = require('./services/users');
+const _tokens = require('./services/tokens');
 // Define handler
 const router = {};
 // Ping handler
@@ -18,7 +18,7 @@ router.ping = (data, cb) => {
 router.users = (data, cb) => {
     const acceptableMethods = ['POST', 'GET', 'PUT', 'DELETE'];
     if (acceptableMethods.indexOf(data.method) > -1) {
-        users[data.method](data, cb);
+        _users[data.method](data, cb);
     } else {
         cb(405);
     }
@@ -27,7 +27,7 @@ router.users = (data, cb) => {
 router.tokens = (data, cb) => {
     const acceptableMethods = ['POST', 'GET', 'PUT', 'DELETE'];
     if (acceptableMethods.indexOf(data.method) > -1) {
-        tokens[data.method](data, cb);
+        _tokens[data.method](data, cb);
     } else {
         cb(405);
     }
