@@ -10,6 +10,7 @@ const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./config');
 const router = require('./router');
+const helpers = require('./lib/helpers');
 
 const httpsCertPath = './https/cert.pem';
 const httpsKeyPath = './https/key.pem';
@@ -68,7 +69,7 @@ const unifiedServer = (req, res) => {
         // If one doesn't exit send the request to the 404 handler
         const chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : router.notFound;
         // Construct the data to send to the handler
-        const data = { trimmedPath, queryStringObject, method, headers,payload: buffer };
+        const data = { trimmedPath, queryStringObject, method, headers, payload: helpers.parseJsonToObject(buffer) };
 
         // Route the request to the chosen handler
         chosenHandler(data, (statusCode, payload) => {
