@@ -1,6 +1,6 @@
 # Up Time Monitoring Application
 
-This application is to help users monitor their application. To check when its down by getting up the application to send SMS when the application is down.
+This application is to help users monitor their application. To check when its down by setting up the application to send SMS when the application is down.
 
 ## Getting Started
 
