@@ -3,12 +3,13 @@
 * @date: 20/01/2019
 */
 // Dependencies
+const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./config');
-const fs = require('fs');
+const router = require('./router');
 
 const httpsCertPath = './https/cert.pem';
 const httpsKeyPath = './https/key.pem';
@@ -87,24 +88,4 @@ const unifiedServer = (req, res) => {
             console.log('Request $', queryStringObject, headers);
         });
     });
-};
-
-// Define handler
-const handlers = {};
-
-// Sample handler
-handlers.sample = (data, cb) => {
-    // Callback a http status code and a payload object
-    cb(406, { 'name': 'Sample Handler'});
-};
-// 404 handler
-handlers.notFound = (data, cb) => {
-    cb(404, { 'name': '404 Handler'});
-};
-
-
-// Define a request handler
-const router = {
-    'sample': handlers.sample,
-    'notFound': handlers.notFound
 };
