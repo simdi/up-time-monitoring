@@ -57,13 +57,22 @@ users.GET = (data, cb) => {
     // Check that the phone is valid
     const phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length == 10 ? data.queryStringObject.phone.trim() : false;
     if (phone) {
-        _data.read('users', phone, (err, data) => {
-            if (!err && data) {
-                // Remove the hashed password from the data object before sending it back to the requester.
-                delete data.hashedPassword;
-                cb(200, data);
+        // Get the token from the headers
+        const token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
+        // Verify that the given token is valid for the phone.
+        helpers.verifyToken(token, phone, (valid) => {
+            if (valid) {
+                _data.read('users', phone, (err, data) => {
+                    if (!err && data) {
+                        // Remove the hashed password from the data object before sending it back to the requester.
+                        delete data.hashedPassword;
+                        cb(200, data);
+                    } else {
+                        cb(404);
+                    }
+                });
             } else {
-                cb(404);
+                cb(405, 'Token is not valid for the user');
             }
         });
     } else {
