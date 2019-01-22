@@ -52,7 +52,6 @@ users.POST = (data, cb) => {
 // Users - GET
 // Required data: phone
 // Optional data: none
-// @TODO Only let users that are authenticated to access their own data
 users.GET = (data, cb) => {
     // Check that the phone is valid
     const phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length == 10 ? data.queryStringObject.phone.trim() : false;
@@ -142,17 +141,26 @@ users.DELETE = (data, cb) => {
     // Check that the phone is valid
     const phone = typeof(data.queryStringObject.phone) == 'string' && data.queryStringObject.phone.trim().length == 10 ? data.queryStringObject.phone.trim() : false;
     if (phone) {
-        _data.read('users', phone, (err, data) => {
-            if (!err && data) {
-                _data.delete('users', phone, err => {
-                    if (!err) {
-                        cb(200);
+        // Get the token from the headers
+        const token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
+        // Verify that the given token is valid for the phone.
+        helpers.verifyToken(token, phone, (isValid) => {
+            if (isValid) {
+                _data.read('users', phone, (err, data) => {
+                    if (!err && data) {
+                        _data.delete('users', phone, err => {
+                            if (!err) {
+                                cb(200);
+                            } else {
+                                cb(404, {error: 'Could not find the specified user!'});
+                            }
+                        });
                     } else {
                         cb(404, {error: 'Could not find the specified user!'});
                     }
                 });
             } else {
-                cb(404, {error: 'Could not find the specified user!'});
+                cb(405, 'Missing required token in header, or token is invalid');
             }
         });
     } else {
