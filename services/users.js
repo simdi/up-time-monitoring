@@ -60,8 +60,9 @@ users.GET = (data, cb) => {
         // Get the token from the headers
         const token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
         // Verify that the given token is valid for the phone.
-        helpers.verifyToken(token, phone, (valid) => {
-            if (valid) {
+        helpers.verifyToken(token, phone, (isValid) => {
+            if (isValid) {
+                // Lookup the user.
                 _data.read('users', phone, (err, data) => {
                     if (!err && data) {
                         // Remove the hashed password from the data object before sending it back to the requester.
@@ -72,7 +73,7 @@ users.GET = (data, cb) => {
                     }
                 });
             } else {
-                cb(405, 'Token is not valid for the user');
+                cb(405, 'Missing required token in header, or token is invalid');
             }
         });
     } else {
@@ -93,29 +94,38 @@ users.PUT = (data, cb) => {
     if (phone) {
         // Error if nothing is sent to update
         if (firstName || lastName || password) {
-            // Lookup the user
-            _data.read('users', phone, (err, userData) => {
-                if (!err && userData) {
-                    // Update the fields necessary
-                    if (firstName) {
-                        userData.firstName = firstName;
-                    }
-                    if (lastName) {
-                        userData.lastName = lastName;
-                    }
-                    if (password) {
-                        userData.hashedPassword = helpers.hash(password);
-                    }
-                    // Store the new user data
-                    _data.update('users', phone, userData, err => {
-                        if (!err) {
-                            cb(200);
+            // Get the token from the headers
+            const token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
+            // Verify that the given token is valid for the phone.
+            helpers.verifyToken(token, phone, (isValid) => {
+                if (isValid) {
+                    // Lookup the user
+                    _data.read('users', phone, (err, userData) => {
+                        if (!err && userData) {
+                            // Update the fields necessary
+                            if (firstName) {
+                                userData.firstName = firstName;
+                            }
+                            if (lastName) {
+                                userData.lastName = lastName;
+                            }
+                            if (password) {
+                                userData.hashedPassword = helpers.hash(password);
+                            }
+                            // Store the new user data
+                            _data.update('users', phone, userData, err => {
+                                if (!err) {
+                                    cb(200);
+                                } else {
+                                    cb(500, {error: 'Could not update the user!'});
+                                }
+                            })
                         } else {
-                            cb(500, {error: 'Could not update the user!'});
+                            cb(400, {error: 'The specified user does not exist!'});
                         }
-                    })
+                    });
                 } else {
-                    cb(400, {error: 'The specified user does not exist!'});
+                    cb(405, 'Missing required token in header, or token is invalid');
                 }
             });
         } else {
