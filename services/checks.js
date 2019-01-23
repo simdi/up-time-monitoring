@@ -19,13 +19,13 @@ checks.POST = (data, cb) => {
     const url = typeof(data.payload.url) == 'string' && data.payload.url.trim().length > 0 ? data.payload.url.trim() : false;
     const method = typeof(data.payload.method) == 'string' && ['post', 'get', 'put', 'delete'].indexOf(data.payload.method) > -1 ? data.payload.method.trim() : false;
     const successCodes = typeof(data.payload.successCodes) == 'object' && data.payload.successCodes instanceof Array && data.payload.successCodes.length > 0 ? data.payload.successCodes : false;
-    const timeoutSeconds = typeof(data.payload.timeoutSeconds) == 'number' && data.payload.timeoutSeconds % 1 === 0 && data.payload.timeoutSeconds <= 5 ? data.payload.timeoutSeconds.trim() : false;
+    const timeoutSeconds = typeof(data.payload.timeoutSeconds) == 'number' && data.payload.timeoutSeconds % 1 === 0 && data.payload.timeoutSeconds <= 5 ? data.payload.timeoutSeconds : false;
     
     if (protocol && url && method && successCodes && timeoutSeconds) {
         // Get the token from the headers
         const token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
         // Verify that the given token is valid for the phone.
-        _data.read('token', token, (err, tokenData) => {
+        _data.read('tokens', token, (err, tokenData) => {
             if (!err && tokenData) {
                 const phone = tokenData.phone;
                 // Lookup the user.
@@ -38,13 +38,14 @@ checks.POST = (data, cb) => {
                             const checkId = helpers.createRandomString(20);
                             // Create the check object and include the user's phone
                             const checkObject = { id: checkId, userPhone: phone, protocol, url, method, successCodes, timeoutSeconds };
+                            console.log('CheckObjecg', checkObject);
                             // Save the object
-                            _data.create('checks', checkObject, (err) => {
+                            _data.create('checks', checkId, checkObject, (err) => {
                                 if (!err) {
                                     // Add the checkId to the user's object
                                     userData.checks = userChecks;
                                     userData.checks.push(checkId);
-                                    _data.update('users', phone, userData, err => {
+                                    _data.update('users', phone, userData, (err) => {
                                         if (!err) {
                                             cb(200, checkObject);
                                         } else {
@@ -58,7 +59,6 @@ checks.POST = (data, cb) => {
                         } else {
                             cb(400, { 'error': `The user already has the maximum number of checks ${config.maxChecks}` });
                         }
-                        cb(200, data);
                     } else {
                         cb(403, { 'error': 'Unauthorized' });
                     }
@@ -71,3 +71,7 @@ checks.POST = (data, cb) => {
         cb(400, { 'error': 'Missing required fields, or inputs are invalid' });
     }
 };
+
+
+// Export all user methods
+module.exports = checks;

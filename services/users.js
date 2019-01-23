@@ -59,8 +59,8 @@ users.GET = (data, cb) => {
         // Get the token from the headers
         const token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
         // Verify that the given token is valid for the phone.
-        helpers.verifyToken(token, phone, (isValid) => {
-            if (isValid) {
+        users.verifyToken(token, phone, (isTokenValid) => {
+            if (isTokenValid) {
                 // Lookup the user.
                 _data.read('users', phone, (err, data) => {
                     if (!err && data) {
@@ -72,11 +72,11 @@ users.GET = (data, cb) => {
                     }
                 });
             } else {
-                cb(405, 'Missing required token in header, or token is invalid');
+                cb(405, { 'error': 'Missing required token in header, or token is invalid' });
             }
         });
     } else {
-        cb(400, {error: 'Missing required field!'});
+        cb(400, { error: 'Missing required field!' });
     }
 }
 // Users - PUT
@@ -96,7 +96,7 @@ users.PUT = (data, cb) => {
             // Get the token from the headers
             const token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
             // Verify that the given token is valid for the phone.
-            helpers.verifyToken(token, phone, (isValid) => {
+            users.verifyToken(token, phone, (isValid) => {
                 if (isValid) {
                     // Lookup the user
                     _data.read('users', phone, (err, userData) => {
@@ -144,7 +144,7 @@ users.DELETE = (data, cb) => {
         // Get the token from the headers
         const token = typeof(data.headers.token) == 'string' ? data.headers.token : false;
         // Verify that the given token is valid for the phone.
-        helpers.verifyToken(token, phone, (isValid) => {
+        users.verifyToken(token, phone, (isValid) => {
             if (isValid) {
                 _data.read('users', phone, (err, data) => {
                     if (!err && data) {
@@ -166,6 +166,23 @@ users.DELETE = (data, cb) => {
     } else {
         cb(400, {error: 'Missing required field!'});
     }
+};
+
+// Verify if a given token id is currently valid for a given user
+users.verifyToken = (id, phone, cb) => {
+    // lookup the token
+    _data.read('tokens', id, (err, tokenData) => {
+        if (!err && tokenData) {
+            // Check that the token is for the given user and has not expired.
+            if (tokenData.phone == phone && tokenData.expires > Date.now()) {
+                cb(true);
+            } else {
+                cb(false);
+            }
+        } else {
+            cb(false);
+        }
+    });
 };
 
 // Export all user methods
