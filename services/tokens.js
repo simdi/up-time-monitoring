@@ -46,7 +46,7 @@ tokens.POST = (data, cb) => {
     } else {
         cb(400, { 'error': 'Missing required fields' });
     }
-}
+};
 // Tokens - GET
 // Required data: id
 // Optional data: none

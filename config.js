@@ -12,14 +12,16 @@ environments.staging = {
     httpPort: 3000,
     httpsPort: 3001,
     envName: 'staging',
-    secret: '1234567890abcedf'
+    secret: '1234567890abcedf',
+    maxChecks: 5
 };
 // Production environment
 environments.production = {
     httpPort: 5000,
     httpsPort: 5001,
     envName: 'production',
-    secret: '1234567890abcedf'
+    secret: '1234567890abcedf',
+    maxChecks: 5
 };
 // Determine which environment was passed as a command-line argument.
 const currentENV = typeof(process.env.NODE_ENV) == 'string' ? process.env.NODE_ENV.toLowerCase() : '';
