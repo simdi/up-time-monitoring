@@ -36,13 +36,13 @@ checks.POST = (data, cb) => {
                         if (userChecks.length < config.maxChecks) {
                             // Create random id for the checks
                             const checkId = helpers.createRandomString(20);
-                            // Create the check object and include the user's phone
+                            // Create the check object and include the user's phone.
                             const checkObject = { id: checkId, userPhone: phone, protocol, url, method, successCodes, timeoutSeconds };
                             console.log('CheckObjecg', checkObject);
-                            // Save the object
+                            // Save the object.
                             _data.create('checks', checkId, checkObject, (err) => {
                                 if (!err) {
-                                    // Add the checkId to the user's object
+                                    // Add the checkId to the user's object.
                                     userData.checks = userChecks;
                                     userData.checks.push(checkId);
                                     _data.update('users', phone, userData, (err) => {
