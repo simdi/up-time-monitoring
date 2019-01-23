@@ -6,6 +6,7 @@
 // Dependencies
 const _users = require('./services/users');
 const _tokens = require('./services/tokens');
+const _checks = require('./services/checks');
 // Define handler
 const router = {};
 // Ping handler
@@ -32,6 +33,15 @@ router.tokens = (data, cb) => {
         cb(405);
     }
 };
+// Checks
+router.checks = (data, cb) => {
+    const acceptableMethods = ['POST', 'GET', 'PUT', 'DELETE'];
+    if (acceptableMethods.indexOf(data.method) > -1) {
+        _checks[data.method](data, cb);
+    } else {
+        cb(405);
+    }
+};
 
 
 
@@ -44,5 +54,6 @@ module.exports = {
     'ping': router.ping,
     'users': router.users,
     'tokens': router.tokens,
+    'checks': router.checks,
     'notFound': router.notFound
 };
