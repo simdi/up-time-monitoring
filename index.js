@@ -31,9 +31,7 @@ const httpsServerOptions = {
   cert: fs.readFileSync(httpsCertPath),
   key: fs.readFileSync(httpsKeyPath)
 };
-const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
-  unifiedServer(req, res);
-});
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => unifiedServer);
 // Start the https server and have it listen to the port specified.
 httpsServer.listen(httpsPort, _=> {
     console.log(`Https server is running in ${env} on port ${httpsPort}`);
